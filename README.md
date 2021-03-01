@@ -8,12 +8,3 @@ This repository is inteded to clearly demonstrate one method of deploying `rke2`
 
 We highly recommend you use the modules in this repository as stepping stones in solutions that meet the needs of your workflow and organization.  If you have suggestions or areas of improvements, we would [love to hear them](https://slack.rancher.io/)!
 
-## TODO
-
-This module is functionally complete, meaning it successfully bootstraps a (HA) rke2 cluster on Azure with _n_ optional nodepools, however, it is still __very__ rough around the edges and in general needs some tlc in the following:
-
-* expand, clean up, and review terraform input/outputs
-* ensure `depends_on` where appropriate (module does not `destroy` properly all the time)
-* bootstrapping architecture review to make sure it meets Azure standards
-* validate on azure gov
-* pair down permissions to least privileged
