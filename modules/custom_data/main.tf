@@ -5,7 +5,7 @@ data "template_file" "init" {
     type = var.agent ? "agent" : "server"
 
     server_url   = var.server_url
-    vault_url = var.vault_url
+    vault_url    = var.vault_url
     token_secret = var.token_secret
     config       = var.config
     ccm          = var.ccm

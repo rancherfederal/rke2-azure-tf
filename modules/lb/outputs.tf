@@ -1,5 +1,5 @@
 output "lb_url" {
-  value = azurerm_public_ip.pip.ip_address
+  value = var.type == "public" ? azurerm_public_ip.pip[0].ip_address : azurerm_lb.this.private_ip_address
 }
 
 output "backend_pool_id" {

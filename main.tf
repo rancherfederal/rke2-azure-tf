@@ -12,26 +12,26 @@ data "azurerm_resource_group" "rg" {
 }
 
 resource "random_string" "uid" {
-  length = 3
+  length  = 3
   special = false
-  lower = true
-  upper = false
-  number = true
+  lower   = true
+  upper   = false
+  number  = true
 }
 
 resource "random_password" "token" {
-  length = 40
+  length  = 40
   special = false
 }
 
 module "statestore" {
   source = "./modules/statestore"
 
-  name = local.uname
+  name                = local.uname
   resource_group_name = data.azurerm_resource_group.rg.name
-  location = data.azurerm_resource_group.rg.location
+  location            = data.azurerm_resource_group.rg.location
 
-  token = random_password.token.result
+  token            = random_password.token.result
   reader_object_id = azurerm_user_assigned_identity.cluster.principal_id
 }
 
@@ -156,53 +156,62 @@ resource "azurerm_user_assigned_identity" "cluster" {
   name = "${local.uname}-cluster"
 
   resource_group_name = data.azurerm_resource_group.rg.name
-  location = data.azurerm_resource_group.rg.location
+  location            = data.azurerm_resource_group.rg.location
 
   tags = merge({}, var.tags)
 }
 
 resource "azurerm_role_assignment" "cluster_vault" {
-  scope = data.azurerm_resource_group.rg.id
-  principal_id = azurerm_user_assigned_identity.cluster.principal_id
+  scope                = data.azurerm_resource_group.rg.id
+  principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Key Vault Secrets User"
 }
 
 resource "azurerm_role_assignment" "cluster_reader" {
-  scope = module.servers.scale_set_id
-  principal_id = azurerm_user_assigned_identity.cluster.principal_id
+  scope                = module.servers.scale_set_id
+  principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Reader"
 }
 
 #
-# Server Network Security Rules
+# Server Network Security Group
 #
-resource "azurerm_network_security_rule" "server_cp" {
-  name = "${local.uname}-rke2-server-controlplane"
-  network_security_group_name = module.servers.network_security_group_name
-  access = "Allow"
-  direction = "Inbound"
-  priority = 101
-  protocol = "Tcp"
-  resource_group_name = data.azurerm_resource_group.rg.name
+resource "azurerm_network_security_group" "server" {
+  name = "${local.uname}-rke2-server-nsg"
 
-  source_port_range = "*"
-  destination_port_range = "6443"
-  source_address_prefix = "*"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+
+  tags = merge({}, var.tags)
+}
+
+resource "azurerm_network_security_rule" "server_cp" {
+  name                        = "${local.uname}-rke2-server-controlplane"
+  network_security_group_name = azurerm_network_security_group.server.name
+  access                      = "Allow"
+  direction                   = "Inbound"
+  priority                    = 101
+  protocol                    = "Tcp"
+  resource_group_name         = data.azurerm_resource_group.rg.name
+
+  source_port_range          = "*"
+  destination_port_range     = "6443"
+  source_address_prefix      = "*"
   destination_address_prefix = "*"
 }
 
 resource "azurerm_network_security_rule" "server_supervisor" {
-  name = "${local.uname}-rke2-server-supervisor"
-  network_security_group_name = module.servers.network_security_group_name
-  access = "Allow"
-  direction = "Inbound"
-  priority = 102
-  protocol = "Tcp"
-  resource_group_name = data.azurerm_resource_group.rg.name
+  name                        = "${local.uname}-rke2-server-supervisor"
+  network_security_group_name = azurerm_network_security_group.server.name
+  access                      = "Allow"
+  direction                   = "Inbound"
+  priority                    = 102
+  protocol                    = "Tcp"
+  resource_group_name         = data.azurerm_resource_group.rg.name
 
-  source_port_range = "*"
-  destination_port_range = "9345"
-  source_address_prefix = "*"
+  source_port_range          = "*"
+  destination_port_range     = "9345"
+  source_address_prefix      = "*"
   destination_address_prefix = "*"
 }
 
@@ -244,14 +253,14 @@ resource "azurerm_network_security_rule" "server_supervisor" {
 module "init" {
   source = "./modules/custom_data"
 
-  server_url = module.cp_lb.lb_url
-  vault_url = module.statestore.vault_url
+  server_url   = module.cp_lb.lb_url
+  vault_url    = module.statestore.vault_url
   token_secret = module.statestore.token_secret_name
 
-  config = ""
-  pre_userdata = ""
-  post_userdata = ""
-  ccm = false
+  config        = var.rke2_config
+  pre_userdata  = var.pre_userdata
+  post_userdata = var.post_userdata
+  ccm           = var.enable_ccm
 
   agent = false
 }
@@ -260,27 +269,30 @@ data "template_cloudinit_config" "init" {
   base64_encode = true
 
   part {
-    filename = "00_download.sh"
+    filename     = "00_download.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/modules/common/download.sh", {
       rke2_version = var.rke2_version
-      type = "server"
+      type         = "server"
     })
   }
 
   part {
-    filename = "01_rke2.sh"
+    filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
-    content = module.init.templated
+    content      = module.init.templated
   }
 }
 
 module "cp_lb" {
   source = "./modules/lb"
 
-  name = local.uname
+  name                = local.uname
   resource_group_name = data.azurerm_resource_group.rg.name
-  subnet_id = var.subnet_id
+
+  subnet_id                     = var.subnet_id
+  private_ip_address            = var.controlplane_loadbalancer_private_ip_address
+  private_ip_address_allocation = var.controlplane_loadbalancer_private_ip_address_allocation
 
   tags = merge({}, var.tags)
 }
@@ -291,27 +303,47 @@ module "servers" {
   name = "${local.uname}-server"
 
   resource_group_name = data.azurerm_resource_group.rg.name
-  virtual_network_id = var.virtual_network_id
-  subnet_id = var.subnet_id
+  virtual_network_id  = var.virtual_network_id
+  subnet_id           = var.subnet_id
 
-  admin_username = var.admin_username
+  admin_username       = var.admin_username
   admin_ssh_public_key = var.admin_ssh_public_key
 
-  instances = var.servers
-  assign_public_ips = var.assign_public_ips
-  vm_size = var.vm_size
-  source_image_reference = var.source_image_reference
+  vm_size                       = var.vm_size
+  instances                     = var.servers
+  overprovision                 = var.overprovision
+  zones                         = var.zones
+  zone_balance                  = var.zone_balance
+  single_placement_group        = var.single_placement_group
+  upgrade_mode                  = var.upgrade_mode
+  priority                      = var.priority
+  eviction_policy               = var.priority == "Spot" ? var.eviction_policy : null
+  dns_servers                   = var.dns_servers
+  enable_accelerated_networking = var.enable_accelerated_networking
 
-  health_probe_id = module.cp_lb.controlplane_probe_id
+  source_image_reference = var.source_image_reference
+  assign_public_ips      = var.assign_public_ips
+  nsg_id                 = azurerm_network_security_group.server.id
+
+  health_probe_id                        = module.cp_lb.controlplane_probe_id
   load_balancer_backend_address_pool_ids = [module.cp_lb.backend_pool_id]
 
   identity_ids = [azurerm_user_assigned_identity.cluster.id]
-  custom_data = data.template_cloudinit_config.init.rendered
+  custom_data  = data.template_cloudinit_config.init.rendered
 
-  enable_automatic_instance_repair = true
-  automatic_instance_repair_grace_period = "PT10M"
+  enable_automatic_instance_repair       = var.enable_automatic_instance_repair
+  automatic_instance_repair_grace_period = var.enable_automatic_instance_repair ? var.automatic_instance_repair_grace_period : null
+
+  os_disk_size_gb              = var.os_disk_size_gb
+  os_disk_storage_account_type = var.os_disk_storage_account_type
+  os_disk_encryption_set_id    = var.os_disk_encryption_set_id
+
+  additional_data_disks = var.additional_data_disks
 
   tags = merge({
     "Role" = "server",
   }, local.ccm_tags, var.tags)
+
+  # Fix bug with dependency upon resource deletions
+  depends_on = [module.cp_lb]
 }
