@@ -3,12 +3,14 @@ data "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_public_ip" "pip" {
-  name = "${var.name}-pip"
+  count = var.type == "public" ? 1 : 0
+
+  name              = "${var.name}-pip"
   allocation_method = "Static"
-  sku = "Standard"
+  sku               = "Standard"
 
   resource_group_name = data.azurerm_resource_group.rg.name
-  location = data.azurerm_resource_group.rg.location
+  location            = data.azurerm_resource_group.rg.location
 
   tags = merge({}, var.tags)
 }
@@ -17,14 +19,16 @@ resource "azurerm_lb" "this" {
   name = "${var.name}-cp"
 
   resource_group_name = data.azurerm_resource_group.rg.name
-  location = data.azurerm_resource_group.rg.location
+  location            = data.azurerm_resource_group.rg.location
 
-  sku = "Standard"
+  sku = var.lb_sku
 
   frontend_ip_configuration {
-    name = "${var.name}-lb-fe"
-    public_ip_address_id = azurerm_public_ip.pip.id
-//    subnet_id = var.subnet_id
+    name                          = "${var.name}-lb-fe"
+    public_ip_address_id          = var.type == "public" ? azurerm_public_ip.pip[0].id : null
+    subnet_id                     = var.subnet_id
+    private_ip_address            = var.private_ip_address
+    private_ip_address_allocation = var.private_ip_address_allocation
   }
 
   tags = merge({}, var.tags)
@@ -35,7 +39,7 @@ resource "azurerm_lb" "this" {
 #
 //noinspection MissingProperty
 resource "azurerm_lb_backend_address_pool" "bepool" {
-  name = "${var.name}-lbe-be-pool"
+  name            = "${var.name}-lbe-be-pool"
   loadbalancer_id = azurerm_lb.this.id
 
   # Deprecated in future azurerm releases, ignore linting
@@ -46,43 +50,43 @@ resource "azurerm_lb_backend_address_pool" "bepool" {
 # Load Balancer health probe
 #
 resource "azurerm_lb_probe" "this" {
-  name = "${var.name}-lb-cp-probe"
-  loadbalancer_id = azurerm_lb.this.id
+  name                = "${var.name}-lb-cp-probe"
+  loadbalancer_id     = azurerm_lb.this.id
   resource_group_name = data.azurerm_resource_group.rg.name
 
-  protocol = "Tcp"
+  protocol            = "Tcp"
   interval_in_seconds = 10
-  number_of_probes = 3
+  number_of_probes    = 3
 
   port = 6443
 }
 
 resource "azurerm_lb_rule" "controlplane" {
-  name = "${var.name}-cp"
-  loadbalancer_id = azurerm_lb.this.id
+  name                = "${var.name}-cp"
+  loadbalancer_id     = azurerm_lb.this.id
   resource_group_name = data.azurerm_resource_group.rg.name
 
-  protocol = "Tcp"
+  protocol      = "Tcp"
   frontend_port = 6443
-  backend_port = 6443
+  backend_port  = 6443
 
   frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
-  backend_address_pool_id = azurerm_lb_backend_address_pool.bepool.id
-  probe_id = azurerm_lb_probe.this.id
+  backend_address_pool_id        = azurerm_lb_backend_address_pool.bepool.id
+  probe_id                       = azurerm_lb_probe.this.id
 }
 
 resource "azurerm_lb_rule" "supervisor" {
-  name = "${var.name}-supervisor"
-  loadbalancer_id = azurerm_lb.this.id
+  name                = "${var.name}-supervisor"
+  loadbalancer_id     = azurerm_lb.this.id
   resource_group_name = data.azurerm_resource_group.rg.name
 
-  protocol = "Tcp"
-  backend_port = 9345
+  protocol      = "Tcp"
+  backend_port  = 9345
   frontend_port = 9345
 
   frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
-  backend_address_pool_id = azurerm_lb_backend_address_pool.bepool.id
-  probe_id = azurerm_lb_probe.this.id
+  backend_address_pool_id        = azurerm_lb_backend_address_pool.bepool.id
+  probe_id                       = azurerm_lb_probe.this.id
 }
 
 #
