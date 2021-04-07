@@ -188,3 +188,12 @@ variable "additional_data_disks" {
   }))
   default = []
 }
+
+variable "location" {
+  description = "resource group location"
+  type = string
+}
+
+variable "resource_group_id" {
+  type = string
+}

@@ -7,9 +7,9 @@ locals {
   }
 }
 
-data "azurerm_resource_group" "rg" {
+/* data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
-}
+} */
 
 resource "random_string" "uid" {
   length  = 3
@@ -28,8 +28,8 @@ module "statestore" {
   source = "./modules/statestore"
 
   name                = local.uname
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   token            = random_password.token.result
   reader_object_id = azurerm_user_assigned_identity.cluster.principal_id
@@ -155,14 +155,14 @@ module "statestore" {
 resource "azurerm_user_assigned_identity" "cluster" {
   name = "${local.uname}-cluster"
 
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   tags = merge({}, var.tags)
 }
 
 resource "azurerm_role_assignment" "cluster_vault" {
-  scope                = data.azurerm_resource_group.rg.id
+  scope                = var.resource_group_id
   principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Key Vault Secrets User"
 }
@@ -179,8 +179,8 @@ resource "azurerm_role_assignment" "cluster_reader" {
 resource "azurerm_network_security_group" "server" {
   name = "${local.uname}-rke2-server-nsg"
 
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   tags = merge({}, var.tags)
 }
@@ -192,7 +192,7 @@ resource "azurerm_network_security_rule" "server_cp" {
   direction                   = "Inbound"
   priority                    = 101
   protocol                    = "Tcp"
-  resource_group_name         = data.azurerm_resource_group.rg.name
+  resource_group_name         = var.resource_group_name
 
   source_port_range          = "*"
   destination_port_range     = "6443"
@@ -207,7 +207,7 @@ resource "azurerm_network_security_rule" "server_supervisor" {
   direction                   = "Inbound"
   priority                    = 102
   protocol                    = "Tcp"
-  resource_group_name         = data.azurerm_resource_group.rg.name
+  resource_group_name         = var.resource_group_name
 
   source_port_range          = "*"
   destination_port_range     = "9345"
@@ -288,7 +288,7 @@ module "cp_lb" {
   source = "./modules/lb"
 
   name                = local.uname
-  resource_group_name = data.azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
 
   subnet_id                     = var.subnet_id
   private_ip_address            = var.controlplane_loadbalancer_private_ip_address
@@ -302,7 +302,7 @@ module "servers" {
 
   name = "${local.uname}-server"
 
-  resource_group_name = data.azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
   virtual_network_id  = var.virtual_network_id
   subnet_id           = var.subnet_id
 
