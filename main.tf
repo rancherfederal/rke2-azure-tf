@@ -162,7 +162,7 @@ resource "azurerm_user_assigned_identity" "cluster" {
 }
 
 resource "azurerm_role_assignment" "cluster_vault" {
-  scope                = var.resource_group_id
+  scope                = var.key_vault_id
   principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Key Vault Secrets User"
 }
@@ -289,11 +289,11 @@ module "cp_lb" {
 
   name                = local.uname
   resource_group_name = var.resource_group_name
-
+  resource_group_id   = var.resource_group_id
   subnet_id                     = var.subnet_id
   private_ip_address            = var.controlplane_loadbalancer_private_ip_address
   private_ip_address_allocation = var.controlplane_loadbalancer_private_ip_address_allocation
-
+  location                      = var.location
   tags = merge({}, var.tags)
 }
 

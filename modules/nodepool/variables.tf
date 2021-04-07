@@ -1,7 +1,9 @@
 variable "name" {}
 variable "resource_group_name" {}
 variable "virtual_network_id" {}
-variable "subnet_id" {}
+variable "subnet_id" {
+  type = list(string)
+}
 variable "admin_username" {}
 variable "admin_ssh_public_key" {}
 variable "assign_public_ips" {}
@@ -92,3 +94,7 @@ variable "zone_balance" {}
 variable "single_placement_group" {}
 variable "dns_servers" {}
 variable "enable_accelerated_networking" {}
+variable "os_upgrade_policy" {
+  type = bool
+  default = true
+}

@@ -17,6 +17,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   zone_balance                    = var.zone_balance
   single_placement_group          = var.single_placement_group
   upgrade_mode                    = var.upgrade_mode
+  automatic_os_upgrade_policy     = var.os_upgrade_policy
   priority                        = var.priority
   eviction_policy                 = var.eviction_policy
   health_probe_id                 = var.health_probe_id

@@ -9,7 +9,7 @@ variable "type" {
 }
 
 variable "subnet_id" {
-  type    = string
+  type    = list(string)
   default = null
 }
 
@@ -31,4 +31,11 @@ variable "lb_sku" {
 variable "tags" {
   default = {}
   type    = map(string)
+}
+variable "resource_group_id" {
+  type = string
+}
+
+variable "location" {
+  type = string
 }
