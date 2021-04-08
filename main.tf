@@ -160,9 +160,9 @@ resource "azurerm_user_assigned_identity" "cluster" {
 
   tags = merge({}, var.tags)
 }
-
-resource "azurerm_role_assignment" "cluster_vault" {
-  scope                = var.key_vault_id
+## TODO: I KNOW THIS IS BAD
+/* resource "azurerm_role_assignment" "cluster_vault" {
+  scope                = var.resource_group_id
   principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Key Vault Secrets User"
 }
@@ -171,7 +171,7 @@ resource "azurerm_role_assignment" "cluster_reader" {
   scope                = module.servers.scale_set_id
   principal_id         = azurerm_user_assigned_identity.cluster.principal_id
   role_definition_name = "Reader"
-}
+} */
 
 #
 # Server Network Security Group
@@ -301,7 +301,7 @@ module "servers" {
   source = "./modules/nodepool"
 
   name = "${local.uname}-server"
-
+  location = var.location
   resource_group_name = var.resource_group_name
   virtual_network_id  = var.virtual_network_id
   subnet_id           = var.subnet_id

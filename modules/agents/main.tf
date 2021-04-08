@@ -6,9 +6,10 @@ locals {
   }
 }
 
-data "azurerm_resource_group" "rg" {
+# Using resource group module and importing through variablies
+/* data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
-}
+} */
 
 #
 # Agent Nodepool

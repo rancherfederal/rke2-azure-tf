@@ -199,6 +199,3 @@ variable "location" {
 variable "resource_group_id" {
   type = string
 }
-variable "key_vault_id" {
-  type = string
-}

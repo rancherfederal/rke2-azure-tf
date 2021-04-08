@@ -98,3 +98,4 @@ variable "os_upgrade_policy" {
   type = bool
   default = true
 }
+variable "location" {}
