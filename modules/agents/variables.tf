@@ -4,6 +4,7 @@ variable "resource_group_name" {}
 variable "virtual_network_id" {}
 variable "subnet_id" {
   type = list(string)
+  default = null
 }
 
 variable "admin_username" {
