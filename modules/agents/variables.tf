@@ -177,3 +177,7 @@ variable "additional_data_disks" {
   }))
   default = []
 }
+
+variable "location" {
+  type = string
+}
