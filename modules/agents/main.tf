@@ -51,8 +51,8 @@ data "template_cloudinit_config" "init" {
 resource "azurerm_network_security_group" "agent" {
   name = "${local.name}-agent-nsg"
 
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   tags = merge({}, var.tags)
 }
@@ -62,7 +62,7 @@ module "agents" {
 
   name = "${local.name}-agent"
 
-  resource_group_name = data.azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
   virtual_network_id  = var.virtual_network_id
   subnet_id           = var.subnet_id
   location            = var.location
