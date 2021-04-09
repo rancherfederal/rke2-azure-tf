@@ -70,7 +70,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
     ip_configuration {
       name      = "ipconfig-${format("vm-%s", lower(replace(var.name, "/[[:^alnum:]]/", "")))}"
       primary   = true
-      subnet_id = var.0.subnet_id
+      subnet_id = var.subnet_id
 
       load_balancer_backend_address_pool_ids = var.load_balancer_backend_address_pool_ids
       load_balancer_inbound_nat_rules_ids    = var.load_balancer_inbound_nat_rules_ids
