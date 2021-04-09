@@ -8,3 +8,10 @@ This repository is inteded to clearly demonstrate one method of deploying `rke2`
 
 We highly recommend you use the modules in this repository as stepping stones in solutions that meet the needs of your workflow and organization.  If you have suggestions or areas of improvements, we would [love to hear them](https://slack.rancher.io/)!
 
+
+
+## TODO:
+
+* Make sure that loadbalancer provisions in all subnets in list of subnets.
+* Figure out missing inputs to get `upgrade_mode = "Automatic"` working.
+
