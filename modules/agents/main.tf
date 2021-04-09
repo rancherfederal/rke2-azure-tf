@@ -65,7 +65,7 @@ module "agents" {
   resource_group_name = data.azurerm_resource_group.rg.name
   virtual_network_id  = var.virtual_network_id
   subnet_id           = var.subnet_id
-
+  location            = var.location
   admin_username       = var.admin_username
   admin_ssh_public_key = var.admin_ssh_public_key
 

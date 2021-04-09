@@ -138,9 +138,9 @@ resource "azurerm_role_definition" "server" {
 }
 
 resource "azurerm_role_assignment" "server" {
-  scope = var.resource_group_name
+  scope = var.resource_group_id
   principal_id = azurerm_user_assigned_identity.server.principal_id
-  role_definition_id = azurerm_role_definition.server.role_definition_id
+  role_definition_name = "Key Vault Secrets User"
 }
 
 resource "azurerm_user_assigned_identity" "server" {
