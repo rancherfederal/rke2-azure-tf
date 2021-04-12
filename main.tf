@@ -217,36 +217,36 @@ resource "azurerm_network_security_rule" "server_supervisor" {
 }
 
 # Default vnet behavior for azure, but include anyways?
-//resource "azurerm_network_security_rule" "vnet" {
-//  name = "${local.uname}-rke2-self"
-//  network_security_group_name = module.servers.network_security_group_name
-//  access = "Allow"
-//  direction = "Inbound"
-//  priority = 1001
-//  protocol = "*"
-//  resource_group_name = data.azurerm_resource_group.rg.name
-//
-//  source_port_range = "*"
-//  destination_port_range = "*"
-//  source_address_prefix = "VirtualNetwork"
-//  destination_address_prefix = "VirtualNetwork"
-//}
+resource "azurerm_network_security_rule" "vnet" {
+  name = "${local.uname}-rke2-self"
+  network_security_group_name = module.servers.network_security_group_name
+  access = "Allow"
+  direction = "Inbound"
+  priority = 1001
+  protocol = "*"
+  resource_group_name = var.resource_group_name
+
+  source_port_range = "*"
+  destination_port_range = "*"
+  source_address_prefix = "VirtualNetwork"
+  destination_address_prefix = "VirtualNetwork"
+}
 
 # Default outbound behavior for azure, but include anyways?
-//resource "azurerm_network_security_rule" "server_outbound" {
-//  name = "${local.uname}-rke2-server-outbound"
-//  network_security_group_name = module.servers.network_security_group_name
-//  access = "Allow"
-//  direction = "Outbound"
-//  priority = 101
-//  protocol = "*"
-//  resource_group_name = data.azurerm_resource_group.rg.name
-//
-//  source_port_range = "*"
-//  destination_port_range = "*"
-//  source_address_prefix = "*"
-//  destination_address_prefix = "*"
-//}
+resource "azurerm_network_security_rule" "server_outbound" {
+  name = "${local.uname}-rke2-server-outbound"
+  network_security_group_name = module.servers.network_security_group_name
+  access = "Allow"
+  direction = "Outbound"
+  priority = 101
+  protocol = "*"
+  resource_group_name = var.resource_group_name
+
+  source_port_range = "*"
+  destination_port_range = "*"
+  source_address_prefix = "*"
+  destination_address_prefix = "*"
+}
 
 #
 # Server Nodepool

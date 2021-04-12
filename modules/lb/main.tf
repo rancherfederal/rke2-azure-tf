@@ -92,26 +92,26 @@ resource "azurerm_lb_rule" "supervisor" {
 #
 # Load Balancer NAT Pools
 #
-//resource "azurerm_lb_nat_pool" "controlplane" {
-//  name = "${var.name}-lb-nat-pool-cp"
-//  loadbalancer_id = azurerm_lb.this.id
-//  resource_group_name = data.azurerm_resource_group.rg.name
-//
-//  frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
-//  protocol = "Tcp"
-//  frontend_port_start = 6443
-//  frontend_port_end = sum([6443, 1])
-//  backend_port = 6443
-//}
-//
-//resource "azurerm_lb_nat_pool" "supervisor" {
-//  name = "${var.name}-lb-nat-pool-supervisor"
-//  loadbalancer_id = azurerm_lb.this.id
-//  resource_group_name = data.azurerm_resource_group.rg.name
-//
-//  frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
-//  protocol = "Tcp"
-//  backend_port = 9345
-//  frontend_port_start = 9345
-//  frontend_port_end = sum([9345, 1])
-//}
+resource "azurerm_lb_nat_pool" "controlplane" {
+  name = "${var.name}-lb-nat-pool-cp"
+  loadbalancer_id = azurerm_lb.this.id
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
+  protocol = "Tcp"
+  frontend_port_start = 6443
+  frontend_port_end = sum([6443, 1])
+  backend_port = 6443
+}
+
+resource "azurerm_lb_nat_pool" "supervisor" {
+  name = "${var.name}-lb-nat-pool-supervisor"
+  loadbalancer_id = azurerm_lb.this.id
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
+  protocol = "Tcp"
+  backend_port = 9345
+  frontend_port_start = 9345
+  frontend_port_end = sum([9345, 1])
+}
