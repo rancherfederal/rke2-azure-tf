@@ -219,7 +219,7 @@ resource "azurerm_network_security_rule" "server_supervisor" {
 # Default vnet behavior for azure, but include anyways?
 resource "azurerm_network_security_rule" "vnet" {
   name = "${local.uname}-rke2-self"
-  network_security_group_name = module.servers.network_security_group_name
+  network_security_group_name = azurerm_network_security_group.server.name
   access = "Allow"
   direction = "Inbound"
   priority = 1001
@@ -235,7 +235,7 @@ resource "azurerm_network_security_rule" "vnet" {
 # Default outbound behavior for azure, but include anyways?
 resource "azurerm_network_security_rule" "server_outbound" {
   name = "${local.uname}-rke2-server-outbound"
-  network_security_group_name = module.servers.network_security_group_name
+  network_security_group_name = azurerm_network_security_group.server.name
   access = "Allow"
   direction = "Outbound"
   priority = 101

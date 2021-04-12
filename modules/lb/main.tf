@@ -95,7 +95,7 @@ resource "azurerm_lb_rule" "supervisor" {
 resource "azurerm_lb_nat_pool" "controlplane" {
   name = "${var.name}-lb-nat-pool-cp"
   loadbalancer_id = azurerm_lb.this.id
-  resource_group_name = data.azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
 
   frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
   protocol = "Tcp"
@@ -107,7 +107,7 @@ resource "azurerm_lb_nat_pool" "controlplane" {
 resource "azurerm_lb_nat_pool" "supervisor" {
   name = "${var.name}-lb-nat-pool-supervisor"
   loadbalancer_id = azurerm_lb.this.id
-  resource_group_name = data.azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
 
   frontend_ip_configuration_name = azurerm_lb.this.frontend_ip_configuration.0.name
   protocol = "Tcp"
