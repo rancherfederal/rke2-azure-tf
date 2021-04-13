@@ -28,3 +28,7 @@ output "nodepool" {
 output "lb" {
   value = module.cp_lb
 }
+
+output "custom_data" {
+  value = module.init
+}
