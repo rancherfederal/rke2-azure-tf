@@ -23,5 +23,5 @@ output "cluster_data" {
 }
 # testing purposes
 output "nodepool" {
-  value = module.nodepool
+  value = module.servers
 }
