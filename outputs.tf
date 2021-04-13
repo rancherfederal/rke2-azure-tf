@@ -25,3 +25,6 @@ output "cluster_data" {
 output "nodepool" {
   value = module.servers
 }
+output "lb" {
+  value = module.cp_lb
+}
