@@ -117,7 +117,7 @@ resource "azurerm_lb_nat_pool" "supervisor" {
 }
 
 resource "azurerm_nat_gateway" "nat" {
-  name = "${local.name}-nat-gw"
+  name = "${var.name}-nat-gw"
 
   resource_group_name  = var.resource_group_name
   location             =  var.location
@@ -132,7 +132,7 @@ resource "azurerm_subnet_nat_gateway_association" "assc" {
 }
 
 resource "azurerm_public_ip_prefix" "nat" {
-  name = "${local.name}-nat-pips"
+  name = "${var.name}-nat-pips"
 
   resource_group_name = var.resource_group_name
   location            = var.location
