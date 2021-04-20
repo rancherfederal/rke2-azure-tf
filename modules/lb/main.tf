@@ -127,7 +127,7 @@ resource "azurerm_nat_gateway" "nat" {
 }
 
 resource "azurerm_subnet_nat_gateway_association" "assc" {
-  subnet_id      = var.vnet_subnets[0]
+  subnet_id      = var.subnet_id[0]
   nat_gateway_id = azurerm_nat_gateway.nat.id
 }
 
