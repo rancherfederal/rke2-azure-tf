@@ -123,7 +123,7 @@ resource "azurerm_nat_gateway" "nat" {
   location             =  var.location
   public_ip_prefix_ids = [azurerm_public_ip_prefix.nat.id]
 
-  tags = local.tags
+  #tags = var.tags
 }
 
 resource "azurerm_subnet_nat_gateway_association" "assc" {
@@ -139,5 +139,5 @@ resource "azurerm_public_ip_prefix" "nat" {
 # TODO make var
   prefix_length = 30
 
-  tags = local.tags
+  #tags = local.tags
 }
