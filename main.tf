@@ -33,6 +33,7 @@ module "statestore" {
 
   token            = random_password.token.result
   reader_object_id = azurerm_user_assigned_identity.cluster.principal_id
+  subnet_ids       = var.subnet_ids
 }
 
 #

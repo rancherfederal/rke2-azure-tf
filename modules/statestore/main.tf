@@ -8,7 +8,11 @@ resource "azurerm_key_vault" "this" {
   sku_name                        = "standard"
   tenant_id                       = data.azurerm_client_config.current.tenant_id
   enabled_for_template_deployment = true
-
+  network_acls {
+    #virtual_network_subnet_ids = var.subnet_ids
+    bypass = "AzureServices"
+    default_action = "Allow"
+  }
   tags = merge({}, var.tags)
 }
 
@@ -36,10 +40,10 @@ resource "azurerm_key_vault_access_policy" "service_reader" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = var.reader_object_id
 
-  key_permissions         = []
-  secret_permissions      = ["Get", "Set"]
-  certificate_permissions = []
-  storage_permissions     = []
+  key_permissions         = ["get", "list", "create"]
+  secret_permissions      = ["get", "list", "set"]
+  certificate_permissions = ["get", "list"]
+  storage_permissions     = ["list", "set", "get"]
 
   lifecycle {
     create_before_destroy = true
@@ -68,26 +72,4 @@ resource "azurerm_key_vault_secret" "token" {
   tags         = merge({}, var.tags)
 
   depends_on = [azurerm_key_vault_access_policy.policy]
-}
-
-variable "name" {}
-variable "location" {}
-variable "resource_group_name" {}
-variable "token" {}
-variable "reader_object_id" {}
-variable "tags" {
-  type    = map(string)
-  default = {}
-}
-
-output "vault_url" {
-  value = azurerm_key_vault.this.vault_uri
-}
-
-output "token_secret_name" {
-  value = azurerm_key_vault_secret.token.name
-}
-
-output "vault_name" {
-  value = azurerm_key_vault.this.name
 }
