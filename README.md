@@ -15,4 +15,5 @@ We highly recommend you use the modules in this repository as stepping stones in
 * Make sure that loadbalancer provisions in all subnets in list of subnets.
 * Figure out missing inputs to get `upgrade_mode = "Automatic"` working.
 * Add Vnet service endpoints for keyvault access from subnets
-* debug rke2.yaml creation
+* debug rke2.yaml creation       
+* add service endpoints for keyvault subnet access
