@@ -92,7 +92,7 @@ fetch_token() {
 }
 
 upload() {
-  # Wait for kubeconfig to exist, then upload to s3 bucket
+  # Wait for kubeconfig to exist, then upload to keyvault
   retries=10
 
   while [ ! -f /etc/rancher/rke2/rke2.yaml ]; do
