@@ -39,10 +39,10 @@ elect_leader() {
   read subscriptionId resourceGroupName virtualMachineScaleSetName < \
     <(echo $(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-09-01" | jq -r ".compute | .subscriptionId, .resourceGroupName, .vmScaleSetName"))
 
-  first=$(curl -s https://management.azure.com/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
+  first=$(curl -s https://management.core.usgovcloudapi.net/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
           -H "Authorization: Bearer $${access_token}" | jq -ej "[.value[]] | sort_by(.instanceId | tonumber) | .[0].properties.osProfile.computerName")
 
-  if [ $(hostname) = $${first} ]; then
+  if [[ $(hostname) = $${first} ]]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
   else
