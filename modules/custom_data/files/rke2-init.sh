@@ -85,7 +85,7 @@ cp_wait() {
 fetch_token() {
   info "Fetching rke2 join token..."
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.usgovcloudapi.net' -H Metadata:true | jq -r ".access_token")
   token=$(curl '${vault_url}secrets/${token_secret}?api-version=2016-10-01' -H "Authorization: Bearer $${access_token}" | jq -r ".value")
 
   echo "token: $${token}" >> "/etc/rancher/rke2/config.yaml"
@@ -103,7 +103,7 @@ upload() {
     ((retries--))
   done
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.usgovcloudapi.net' -H Metadata:true | jq -r ".access_token")
 
   curl -v -X PUT \
     -H "Content-Type: application/json" \

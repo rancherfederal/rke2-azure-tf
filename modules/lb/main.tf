@@ -42,8 +42,6 @@ resource "azurerm_lb_backend_address_pool" "bepool" {
   name            = "${var.name}-lbe-be-pool"
   loadbalancer_id = azurerm_lb.this.id
   resource_group_name = var.resource_group_name
-  # Deprecated in future azurerm releases, ignore linting
-  //  resource_group_name = ""
 }
 
 #
@@ -115,29 +113,4 @@ resource "azurerm_lb_nat_pool" "supervisor" {
   frontend_port_start = 9345
   frontend_port_end = sum([9345, 1])
 }
-
-resource "azurerm_nat_gateway" "nat" {
-  name = "${var.name}-nat-gw"
-
-  resource_group_name  = var.resource_group_name
-  location             =  var.location
-  public_ip_prefix_ids = [azurerm_public_ip_prefix.nat.id]
-
-  #tags = var.tags
-}
-
-resource "azurerm_subnet_nat_gateway_association" "assc" {
-  subnet_id      = var.subnet_id[0]
-  nat_gateway_id = azurerm_nat_gateway.nat.id
-}
-
-resource "azurerm_public_ip_prefix" "nat" {
-  name = "${var.name}-nat-pips"
-
-  resource_group_name = var.resource_group_name
-  location            = var.location
-# TODO make var
-  prefix_length = 30
-
-  #tags = local.tags
-}
+# NAT Removed and created during vnet creation
