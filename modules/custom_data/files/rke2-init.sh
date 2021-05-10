@@ -134,10 +134,10 @@ post_userdata() {
   config
   fetch_token
 
-#  if [ $CCM = "true" ]; then
-#    append_config 'cloud-provider-name: "aws"'
-#  fi
-#
+ if [ $CCM = "true" ]; then
+   append_config 'cloud-provider-name: "azure"'
+ fi
+
   if [ $TYPE = "server" ]; then
     # Initialize server
     identify
