@@ -248,6 +248,25 @@ resource "azurerm_network_security_rule" "server_outbound" {
   source_address_prefix = "*"
   destination_address_prefix = "*"
 }
+#
+# Dev/Example settings only
+#
+# Open up ssh on all the nodepools
+resource "azurerm_network_security_rule" "ssh" {
+
+  name                        = "${local.uname}-ssh"
+  access                      = "Allow"
+  direction                   = "Inbound"
+  network_security_group_name = local.nodepool_nsgs[count.index]
+  priority                    = 201
+  protocol                    = "Tcp"
+  resource_group_name         = azurerm_resource_group.quickstart.name
+
+  source_address_prefix      = "*"
+  source_port_range          = "*"
+  destination_address_prefix = "*"
+  destination_port_range     = "22"
+}
 
 #
 # Server Nodepool
