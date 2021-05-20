@@ -257,10 +257,10 @@ resource "azurerm_network_security_rule" "ssh" {
   name                        = "${local.uname}-ssh"
   access                      = "Allow"
   direction                   = "Inbound"
-  network_security_group_name = local.nodepool_nsgs[count.index]
+  network_security_group_name = azurerm_network_security_group.server.name
   priority                    = 201
   protocol                    = "Tcp"
-  resource_group_name         = azurerm_resource_group.quickstart.name
+  resource_group_name         = var.resource_group_name
 
   source_address_prefix      = "*"
   source_port_range          = "*"
