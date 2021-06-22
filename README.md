@@ -8,3 +8,11 @@ This repository is inteded to clearly demonstrate one method of deploying `rke2`
 
 We highly recommend you use the modules in this repository as stepping stones in solutions that meet the needs of your workflow and organization.  If you have suggestions or areas of improvements, we would [love to hear them](https://slack.rancher.io/)!
 
+
+__WARNING:__ The leader election process is busted.  To get this module to work you must select 1 server and rerun `01_rke.sh` in `/var/lib/cloud/instances/$INSTANCE/scripts/01_rke2.sh` on subsequent server nodes to get them to join the cluster.
+
+The `agents` module, however works just fine in joining the cluster once a master is present.
+
+## TODO:
+
+* Figure out missing inputs to get `upgrade_mode = "Automatic"` working.

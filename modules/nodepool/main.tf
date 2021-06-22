@@ -1,14 +1,14 @@
 locals {}
 
-data "azurerm_resource_group" "rg" {
+/* data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
-}
+} */
 
 resource "azurerm_linux_virtual_machine_scale_set" "this" {
   name = format("vm-%s", lower(replace(var.name, "/[[:^alnum:]]/", "")))
 
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   sku                             = var.vm_size
   instances                       = var.instances
@@ -17,6 +17,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   zone_balance                    = var.zone_balance
   single_placement_group          = var.single_placement_group
   upgrade_mode                    = var.upgrade_mode
+  /* automatic_os_upgrade_policy     = var.os_upgrade_policy */
   priority                        = var.priority
   eviction_policy                 = var.eviction_policy
   health_probe_id                 = var.health_probe_id
@@ -69,7 +70,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
     ip_configuration {
       name      = "ipconfig-${format("vm-%s", lower(replace(var.name, "/[[:^alnum:]]/", "")))}"
       primary   = true
-      subnet_id = var.subnet_id
+      subnet_id = var.subnet_id[0]
 
       load_balancer_backend_address_pool_ids = var.load_balancer_backend_address_pool_ids
       load_balancer_inbound_nat_rules_ids    = var.load_balancer_inbound_nat_rules_ids

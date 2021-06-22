@@ -2,7 +2,9 @@ variable "cluster_name" {}
 
 variable "resource_group_name" {}
 variable "virtual_network_id" {}
-variable "subnet_id" {}
+variable "subnet_id" {
+  type = list(string)
+}
 
 variable "admin_username" {
   default = "rke2"
@@ -187,4 +189,17 @@ variable "additional_data_disks" {
     storage_account_type = string
   }))
   default = []
+}
+
+variable "location" {
+  description = "resource group location"
+  type = string
+}
+
+variable "resource_group_id" {
+  type = string
+}
+
+variable "subnet_ids" {
+    type = list(string)
 }

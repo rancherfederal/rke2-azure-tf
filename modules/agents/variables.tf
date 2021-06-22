@@ -1,19 +1,31 @@
-variable "name" {}
+variable "name" {
+  type = string
+}
 
-variable "resource_group_name" {}
-variable "virtual_network_id" {}
-variable "subnet_id" {}
+variable "resource_group_name" {
+  type = string
+}
+variable "virtual_network_id" {
+  type = string
+}
+variable "subnet_id" {
+  type = list(string)
+  default = null
+}
 
 variable "admin_username" {
+  type = string
   default = "rke2"
 }
 
 variable "admin_ssh_public_key" {
   default = ""
+  type = string
 }
 
 variable "assign_public_ips" {
   default = false
+  type = bool
 }
 
 variable "instances" {
@@ -80,6 +92,7 @@ variable "vm_size" {
 
 variable "rke2_version" {
   default = "v1.19.8+rke2r1"
+  type = string
 }
 
 variable "tags" {
@@ -104,6 +117,7 @@ variable "cluster_data" {
 variable "overprovision" {
   description = "(Optional) Toggle agent scaleset overprovisioning."
   default     = true
+  type        = bool
 }
 
 variable "zones" {
@@ -114,26 +128,31 @@ variable "zones" {
 variable "zone_balance" {
   description = "(Optional) Toggle server balance within availability zones specified."
   default     = null
+  type        = bool
 }
 
 variable "single_placement_group" {
   description = "TODO: (Optional) Toggle single placement group."
   default     = null
+  type        = bool
 }
 
 variable "upgrade_mode" {
   description = "(Optional) Specify how upgrades should happen. Possible values are Automatic, Manual and Rolling. Defaults to Automatic."
   default     = "Automatic"
+  type        = string
 }
 
 variable "priority" {
   description = "(Optional) Specify the priority of the VMSS.  Possible values are Regular and Spot. Defaults to Regular"
   default     = "Regular"
+  type        = string
 }
 
 variable "eviction_policy" {
   description = "(Optional) Specify how server instances should be evicted. Possible values are Delete and Deallocate."
   default     = "Delete"
+  type        = string
 }
 
 variable "dns_servers" {
@@ -174,4 +193,8 @@ variable "additional_data_disks" {
     storage_account_type = string
   }))
   default = []
+}
+
+variable "location" {
+  type = string
 }

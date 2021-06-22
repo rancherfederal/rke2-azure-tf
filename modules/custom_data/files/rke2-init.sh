@@ -39,10 +39,10 @@ elect_leader() {
   read subscriptionId resourceGroupName virtualMachineScaleSetName < \
     <(echo $(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-09-01" | jq -r ".compute | .subscriptionId, .resourceGroupName, .vmScaleSetName"))
 
-  first=$(curl -s https://management.azure.com/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
+  first=$(curl -s https://management.core.usgovcloudapi.net/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
           -H "Authorization: Bearer $${access_token}" | jq -ej "[.value[]] | sort_by(.instanceId | tonumber) | .[0].properties.osProfile.computerName")
 
-  if [ $(hostname) = $${first} ]; then
+  if [[ $(hostname) = $${first} ]]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
   else
@@ -85,14 +85,14 @@ cp_wait() {
 fetch_token() {
   info "Fetching rke2 join token..."
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.usgovcloudapi.net' -H Metadata:true | jq -r ".access_token")
   token=$(curl '${vault_url}secrets/${token_secret}?api-version=2016-10-01' -H "Authorization: Bearer $${access_token}" | jq -r ".value")
 
   echo "token: $${token}" >> "/etc/rancher/rke2/config.yaml"
 }
 
 upload() {
-  # Wait for kubeconfig to exist, then upload to s3 bucket
+  # Wait for kubeconfig to exist, then upload to keyvault
   retries=10
 
   while [ ! -f /etc/rancher/rke2/rke2.yaml ]; do
@@ -103,7 +103,7 @@ upload() {
     ((retries--))
   done
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.usgovcloudapi.net' -H Metadata:true | jq -r ".access_token")
 
   curl -v -X PUT \
     -H "Content-Type: application/json" \
@@ -134,10 +134,10 @@ post_userdata() {
   config
   fetch_token
 
-#  if [ $CCM = "true" ]; then
-#    append_config 'cloud-provider-name: "aws"'
-#  fi
-#
+ if [ $CCM = "true" ]; then
+   append_config 'cloud-provider-name: "azure"'
+ fi
+
   if [ $TYPE = "server" ]; then
     # Initialize server
     identify
