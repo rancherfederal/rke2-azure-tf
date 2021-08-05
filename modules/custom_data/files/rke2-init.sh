@@ -2,6 +2,7 @@
 
 export TYPE="${type}"
 export CCM="${ccm}"
+export CLOUD="${cloud}"
 
 # info logs the given argument at info log level.
 info() {
@@ -28,20 +29,31 @@ EOF
 }
 
 append_config() {
-  echo $1 >> "/etc/rancher/rke2/config.yaml"
+  echo "$1" >> "/etc/rancher/rke2/config.yaml"
+}
+
+get_azure_domain() {
+  if [ "$CLOUD" = "AzureUSGovernmentCloud" ]; then
+    echo 'usgovcloudapi.net'
+  else
+    echo 'azure.com'
+  fi
 }
 
 # The most simple "leader election" you've ever seen in your life
 elect_leader() {
 
-  access_token=$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com' -H Metadata:true | jq -r ".access_token")
+  azure_domain=$(get_azure_domain)
+
+  access_token=$(curl -s "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.$${azure_domain}" -H Metadata:true | jq -r ".access_token")
 
   read subscriptionId resourceGroupName virtualMachineScaleSetName < \
     <(echo $(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-09-01" | jq -r ".compute | .subscriptionId, .resourceGroupName, .vmScaleSetName"))
 
-  first=$(curl -s https://management.azure.com/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
+  first=$(curl -s https://management.$${azure_domain}/subscriptions/$${subscriptionId}/resourceGroups/$${resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/$${virtualMachineScaleSetName}/virtualMachines?api-version=2020-12-01 \
           -H "Authorization: Bearer $${access_token}" | jq -ej "[.value[]] | sort_by(.instanceId | tonumber) | .[0].properties.osProfile.computerName")
 
+  
   if [ $(hostname) = $${first} ]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
@@ -56,9 +68,9 @@ identify() {
   # Default to server
   SERVER_TYPE="server"
 
-  supervisor_status=$(curl --max-time 5.0 --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
+  supervisor_status=$(curl --max-time 5.0 --write-out '%%{http_code}' -sk --output /dev/null https://"${server_url}":9345/ping)
 
-  if [ $supervisor_status -ne 200 ]; then
+  if [ "$supervisor_status" -ne 200 ]; then
     info "API server unavailable, performing simple leader election"
     elect_leader
   else
@@ -68,12 +80,11 @@ identify() {
 
 cp_wait() {
   while true; do
-    supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
-    if [ $supervisor_status -eq 200 ]; then
+    supervisor_status=$(curl --max-time 5.0 --write-out '%%{http_code}' -sk --output /dev/null https://"${server_url}":9345/ping)
+    if [ "$supervisor_status" -eq 200 ]; then
       info "Cluster is ready"
 
-      # Let things settle down for a bit, not required
-      # TODO: Remove this after some testing
+      # Let things settle down for a bit, without this HA cluster creation is very unreliable
       sleep 10
       break
     fi
@@ -85,7 +96,9 @@ cp_wait() {
 fetch_token() {
   info "Fetching rke2 join token..."
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  azure_domain=$(get_azure_domain)
+
+  access_token=$(curl "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.$${azure_domain}" -H Metadata:true | jq -r ".access_token")
   token=$(curl '${vault_url}secrets/${token_secret}?api-version=2016-10-01' -H "Authorization: Bearer $${access_token}" | jq -r ".value")
 
   echo "token: $${token}" >> "/etc/rancher/rke2/config.yaml"
@@ -103,7 +116,9 @@ upload() {
     ((retries--))
   done
 
-  access_token=$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -H Metadata:true | jq -r ".access_token")
+  azure_domain=$(get_azure_domain)
+
+  access_token=$(curl "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.$${azure_domain}" -H Metadata:true | jq -r ".access_token")
 
   curl -v -X PUT \
     -H "Content-Type: application/json" \
@@ -134,11 +149,16 @@ post_userdata() {
   config
   fetch_token
 
-#  if [ $CCM = "true" ]; then
-#    append_config 'cloud-provider-name: "aws"'
-#  fi
-#
-  if [ $TYPE = "server" ]; then
+  if [ "$CCM" = "true" ]; then
+    append_config 'cloud-provider-name: azure'
+    append_config 'cloud-provider-config: /etc/rancher/rke2/cloud.conf'
+  fi
+
+  # Config which is applied to both agent and server nodes
+  append_config 'node-label: ${node_labels}'
+  append_config 'node-taint: ${node_taints}'
+
+  if [ "$TYPE" = "server" ]; then
     # Initialize server
     identify
 
@@ -152,6 +172,14 @@ EOF
       # Wait for cluster to exist, then init another server
       cp_wait
     fi
+
+    # This attempts to stagger the times when servers try to join the cluster
+    # We rely on the well ordered cardinal host names that VMSS will assign
+    host=$(hostname)
+    hostNum=$${host: -2}
+    sleepTime=$(( hostNum * 80 ))
+    info "Staggering process, waiting extra $sleepTime seconds before joining..."
+    sleep $sleepTime
 
     systemctl enable rke2-server
     systemctl daemon-reload

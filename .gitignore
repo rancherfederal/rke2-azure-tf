@@ -1,11 +1,6 @@
 # Local .terraform directories
 **/.terraform/*
 
-# .tfstate files
-*.tfstate
-*.tfstate.*
-*.terraform.lock.hcl*
-
 # Crash log files
 crash.log
 
@@ -36,3 +31,21 @@ override.tf.json
 *.pem
 rke2.yaml
 admin.conf
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.terraform.lock.hcl*
+
+# tf vars & plans
+*.tfvars
+*.tfplan
+!sample.tfvars
+
+# rke2
+*.kubeconfig
+*.priv_key
+.ssh
+
+# Test output
+tests/*.xml

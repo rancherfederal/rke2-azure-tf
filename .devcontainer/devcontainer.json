@@ -1,0 +1,29 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.155.1/containers/azure-functions-dotnetcore-3.1
+{
+  "name": "RKE2 Azure",
+  "dockerFile": "Dockerfile",
+  "mounts": [
+    // Mounts the login details from the host machine to azcli works in the container
+    "type=bind,source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure",
+    // ssh keys for git repos
+    "type=bind,source=${env:HOME}${env:USERPROFILE}/.ssh,target=/home/vscode/.ssh-localhost"
+  ],
+  // We need to be able to use the network for openVPN (see https://github.com/haugene/docker-transmission-openvpn/issues/488).
+  "runArgs": [
+    "--cap-add=NET_ADMIN"
+  ],
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/zsh"
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "ms-vscode.azure-account",
+    "hashicorp.terraform"
+  ],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "sudo chown -R $(whoami) ~/",
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "vscode"
+}
