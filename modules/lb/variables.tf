@@ -32,3 +32,9 @@ variable "tags" {
   default = {}
   type    = map(string)
 }
+
+variable "zone" {
+  description = "(Optional) Defaults to No-Zone. Possible values Zone-Redundant, 1, 2, 3, No-Zone"
+  type        = string
+  default     = "No-Zone"
+}

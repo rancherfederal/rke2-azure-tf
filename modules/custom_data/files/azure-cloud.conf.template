@@ -1,0 +1,18 @@
+{
+    "cloud": "${cloud}",
+    "tenantId": "${tenant_id}",
+    "userAssignedIdentityID": "${user_assigned_identity_id}",
+    "subscriptionId": "${subscription_id}",
+    "resourceGroup": "${rg_name}",
+    "vmType": "vmss",
+    "location": "${location}",
+    "subnetName": "${subnet_name}",
+    "securityGroupName": "${nsg_name}",
+    "securityGroupResourceGroup": "${rg_name}",
+    "vnetName": "${virtual_network_name}",
+    "vnetResourceGroup": "${rg_name}",
+    "routeTableName": "${rg_name}",
+    "useManagedIdentityExtension": true,
+    "useInstanceMetadata": true,
+    "loadBalancerSku": "standard"
+}

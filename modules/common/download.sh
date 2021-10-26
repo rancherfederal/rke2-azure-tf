@@ -10,18 +10,18 @@ fi
 
 # info logs the given argument at info log level.
 info() {
-    echo "[INFO] " "$@"
+  echo "[INFO] " "$@"
 }
 
 # warn logs the given argument at warn log level.
 warn() {
-    echo "[WARN] " "$@" >&2
+  echo "[WARN] " "$@" >&2
 }
 
 # fatal logs the given argument at fatal log level.
 fatal() {
-    echo "[ERROR] " "$@" >&2
-    exit 1
+  echo "[ERROR] " "$@" >&2
+  exit 1
 }
 
 read_os() {

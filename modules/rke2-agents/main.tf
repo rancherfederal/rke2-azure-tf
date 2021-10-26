@@ -10,6 +10,8 @@ data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
 }
 
+data "azurerm_client_config" "current" {}
+
 #
 # Agent Nodepool
 #
@@ -23,7 +25,11 @@ module "init" {
   config        = var.rke2_config
   pre_userdata  = var.pre_userdata
   post_userdata = var.post_userdata
-  ccm           = false
+  # Has to be set to true on agents for Azure disk based PVCs to mount
+  ccm         = true
+  cloud       = var.cloud
+  node_labels = "[\"failure-domain.beta.kubernetes.io/region=${data.azurerm_resource_group.rg.location}\"]"
+  node_taints = "[]"
 
   agent = true
 }
@@ -45,6 +51,35 @@ data "template_cloudinit_config" "init" {
     content_type = "text/x-shellscript"
     content      = module.init.templated
   }
+
+  part {
+    filename     = "azure-cloud.tpl"
+    content_type = "text/cloud-config"
+    content = jsonencode({
+      write_files = [
+        {
+          content     = "vm.max_map_count=262144\nsysctl -w fs.file-max=131072"
+          path        = "/etc/sysctl.d/10-vm-map-count.conf"
+          permissions = "5555"
+        },
+        {
+          content = templatefile("${path.module}/../custom_data/files/azure-cloud.conf.template", {
+            tenant_id                 = data.azurerm_client_config.current.tenant_id
+            user_assigned_identity_id = var.cluster_data.cluster_identity_client_id
+            subscription_id           = data.azurerm_client_config.current.subscription_id
+            rg_name                   = data.azurerm_resource_group.rg.name
+            location                  = data.azurerm_resource_group.rg.location
+            subnet_name               = var.subnet_name
+            virtual_network_name      = var.virtual_network_name
+            nsg_name                  = var.k8s_nsg_name
+            cloud                     = var.cloud
+          })
+          path        = "/etc/rancher/rke2/cloud.conf"
+          permissions = "5555"
+        }
+      ]
+    })
+  }
 }
 
 resource "azurerm_network_security_group" "agent" {
@@ -52,6 +87,30 @@ resource "azurerm_network_security_group" "agent" {
 
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
+
+  security_rule {
+    name                       = "istio-http"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "istio-https"
+    priority                   = 102
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
   tags = merge({}, var.tags)
 }

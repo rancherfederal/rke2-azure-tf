@@ -31,6 +31,27 @@ variable "ccm" {
   default     = false
 }
 
+variable "cloud" {
+  type    = string
+  default = "AzureUSGovernmentCloud"
+  validation {
+    condition     = contains(["AzureUSGovernmentCloud", "AzurePublicCloud"], var.cloud)
+    error_message = "Allowed values for cloud are \"AzureUSGovernmentCloud\" or \"AzurePublicCloud\"."
+  }
+}
+
+variable "node_labels" {
+  description = "Node labels to add to the cluster"
+  type        = string
+  default     = "[]"
+}
+
+variable "node_taints" {
+  description = "Node taints to add to the cluster"
+  type        = string
+  default     = "[]"
+}
+
 #
 # Custom Userdata
 #
@@ -43,3 +64,5 @@ variable "post_userdata" {
   description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
   default     = ""
 }
+
+

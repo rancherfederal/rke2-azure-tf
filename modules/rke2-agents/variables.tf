@@ -1,19 +1,53 @@
-variable "name" {}
+variable "name" {
+  type        = string
+  description = "Name of the agents to create"
+}
 
-variable "resource_group_name" {}
-variable "virtual_network_id" {}
-variable "subnet_id" {}
+variable "resource_group_name" {
+  type        = string
+  description = "Name of the resource group where to deploy the agents"
+}
+
+variable "virtual_network_id" {
+  type        = string
+  description = "Name of the virtual network where to deploy the agents"
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "Name of the subnet where to deploy the agents"
+}
+
+variable "k8s_nsg_name" {
+  type        = string
+  description = "Name of the kubernets nsg where to deploy the agents"
+}
+
+variable "virtual_network_name" {
+  type        = string
+  description = "Name of the virtual network where to deploy the agents"
+}
+variable "subnet_name" {
+  type        = string
+  description = "Name of the subnet where to deploy the agents"
+}
 
 variable "admin_username" {
-  default = "rke2"
+  default     = "rke2"
+  type        = string
+  description = "The username to use for SSH access to the nodes"
 }
 
 variable "admin_ssh_public_key" {
-  default = ""
+  default     = ""
+  type        = string
+  description = "The SSH public key to use for SSH access to the nodes"
 }
 
 variable "assign_public_ips" {
-  default = false
+  default     = false
+  type        = bool #changed from 'boolean'
+  description = "If true, the nodes will be assigned public IPs"
 }
 
 variable "instances" {
@@ -74,15 +108,16 @@ variable "source_image_reference" {
 
 variable "vm_size" {
   type        = string
-  default     = "Standard_F2"
+  default     = "Standard_DS4_v2"
   description = "Server pool vm size"
 }
 
 variable "rke2_version" {
-  default = "v1.19.8+rke2r1"
+  default = "v1.21.5+rke2r2"
 }
 
 variable "tags" {
+  description = "Tags to apply to the agents"
   type    = map(string)
   default = {}
 }
@@ -91,9 +126,10 @@ variable "cluster_data" {
   description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module, do NOT modify"
 
   type = object({
-    name                = string
-    server_url          = string
-    cluster_identity_id = string
+    name                       = string
+    server_url                 = string
+    cluster_identity_id        = string
+    cluster_identity_client_id = string
     token = object({
       vault_url    = string
       token_secret = string
@@ -174,4 +210,13 @@ variable "additional_data_disks" {
     storage_account_type = string
   }))
   default = []
+}
+
+variable "cloud" {
+  type    = string
+  default = "AzureUSGovernmentCloud"
+  validation {
+    condition     = contains(["AzureUSGovernmentCloud", "AzurePublicCloud"], var.cloud)
+    error_message = "Allowed values for cloud are \"AzureUSGovernmentCloud\" or \"AzurePublicCloud\"."
+  }
 }
