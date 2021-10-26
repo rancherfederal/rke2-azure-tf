@@ -25,7 +25,7 @@ resource "azurerm_subnet" "rke2" {
 }
 
 module "rke2" {
-  source                 = "../"
+  source                 = "../.."
   cluster_name           = var.cluster_name
   subnet_id              = azurerm_subnet.rke2.id
   server_public_ip       = var.server_public_ip

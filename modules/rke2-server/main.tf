@@ -131,8 +131,8 @@ module "init" {
   ccm           = var.enable_ccm
   node_labels   = "[]"
   node_taints   = "[\"CriticalAddonsOnly=true:NoExecute\"]"
-
-  agent = false
+  cloud         = var.cloud
+  agent         = false
 }
 
 data "azurerm_client_config" "current" {}
