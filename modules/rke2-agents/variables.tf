@@ -46,7 +46,7 @@ variable "admin_ssh_public_key" {
 
 variable "assign_public_ips" {
   default     = false
-  type        = boolean
+  type        = bool #changed from 'boolean'
   description = "If true, the nodes will be assigned public IPs"
 }
 
@@ -113,7 +113,7 @@ variable "vm_size" {
 }
 
 variable "rke2_version" {
-  default = "v1.19.8+rke2r1"
+  default = "v1.21.5+rke2r2"
 }
 
 variable "tags" {

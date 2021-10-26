@@ -23,7 +23,7 @@ variable "admin_ssh_public_key" {
   description = "SSH public key to use for the node pool"
 }
 variable "assign_public_ips" {
-  type        = boolean
+  type        = bool #changed from 'boolean'
   description = "Whether to assign public ips to nodes"
 }
 

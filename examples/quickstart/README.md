@@ -14,12 +14,12 @@ This is an example RKE2 deployment which uses the main module at the root of thi
 For kubectl
 
 ```bash
-source ../scripts/fetch-kubeconfig.sh
+source ../../scripts/fetch-kubeconfig.sh
 kubectl get nodes
 ```
 
 For SSH
 
 ```bash
-../scripts/fetch-ssh-key.sh
+../../scripts/fetch-ssh-key.sh
 ```

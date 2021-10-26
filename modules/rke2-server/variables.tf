@@ -104,7 +104,7 @@ variable "vm_size" {
 }
 
 variable "rke2_version" {
-  default = "v1.19.8+rke2r1"
+  default = "v1.21.5+rke2r2"
 }
 
 variable "pre_userdata" {

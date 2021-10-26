@@ -89,6 +89,7 @@ resource "azurerm_lb_rule" "supervisor" {
   probe_id                       = azurerm_lb_probe.this.id
 }
 
+
 resource "azurerm_lb_nat_pool" "ssh" {
   resource_group_name            = data.azurerm_resource_group.rg.name
   loadbalancer_id                = azurerm_lb.this.id
