@@ -13,7 +13,8 @@ fi
 DIRECTORY=$(dirname $0)
 
 KV_NAME=${1:-$(terraform output -raw kv_name)}
-FILE=$(realpath rke2.kubeconfig)
+FILE=rke2.kubeconfig
+
 
 echo "Fetching kubeconfig from KeyVault $KV_NAME"
 az keyvault secret show --name kubeconfig --vault-name $KV_NAME -o json | jq -r '.value' > $FILE
