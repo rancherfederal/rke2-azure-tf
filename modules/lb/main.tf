@@ -52,7 +52,6 @@ resource "azurerm_lb_backend_address_pool" "bepool" {
 resource "azurerm_lb_probe" "this" {
   name                = "${var.name}-lb-cp-probe"
   loadbalancer_id     = azurerm_lb.this.id
-# resource_group_name = data.azurerm_resource_group.rg.name
 
   protocol            = "Tcp"
   interval_in_seconds = 10
@@ -64,7 +63,6 @@ resource "azurerm_lb_probe" "this" {
 resource "azurerm_lb_rule" "controlplane" {
   name                = "${var.name}-cp"
   loadbalancer_id     = azurerm_lb.this.id
-# resource_group_name = data.azurerm_resource_group.rg.name
 
   protocol      = "Tcp"
   frontend_port = 6443
@@ -78,7 +76,6 @@ resource "azurerm_lb_rule" "controlplane" {
 resource "azurerm_lb_rule" "supervisor" {
   name                = "${var.name}-supervisor"
   loadbalancer_id     = azurerm_lb.this.id
-# resource_group_name = data.azurerm_resource_group.rg.name
 
   protocol      = "Tcp"
   backend_port  = 9345
